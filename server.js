@@ -1,12 +1,10 @@
 "use strict";
-const http = require("node:http");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const root = process.cwd();
+const root = __dirname;
 const dataFile = path.join(root, "data", "store.json");
-const port = Number(process.env.PORT || 3000);
 const production = process.env.NODE_ENV === "production";
 const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.SESSION_SECRET;
@@ -46,7 +44,7 @@ function loginAllowed(ip) { const state=attempts.get(ip); if (!state || state.un
 function failedLogin(ip) { const state=attempts.get(ip) || {count:0,until:Date.now()+fifteenMinutes}; state.count++; attempts.set(ip,state); }
 function safePath(urlPath) { const requested = urlPath === "/" ? "/index.html" : decodeURIComponent(urlPath); const resolved = path.resolve(root, `.${requested}`); return resolved.startsWith(root + path.sep) ? resolved : null; }
 
-const server = http.createServer(async (req,res) => {
+module.exports = async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     if (url.pathname === "/api/products" && req.method === "GET") return send(res,200,(await readData()).products);
@@ -75,6 +73,4 @@ const server = http.createServer(async (req,res) => {
     }
     console.error(error); return send(res,500,{error:"Server error"});
   }
-});
-setInterval(() => { const now=Date.now(); for(const [id,s] of sessions)if(s.expires<now)sessions.delete(id); for(const [ip,a] of attempts)if(a.until<now)attempts.delete(ip); }, fifteenMinutes).unref();
-module.exports = server;
+};
