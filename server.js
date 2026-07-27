@@ -4,7 +4,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const root = __dirname;
+const root = process.cwd();
 const dataFile = path.join(root, "data", "store.json");
 const port = Number(process.env.PORT || 3000);
 const production = process.env.NODE_ENV === "production";
