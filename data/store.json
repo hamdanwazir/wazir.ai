@@ -1,0 +1,19 @@
+{
+  "store": {
+    "name": "Rahmat Ullah & Abdullah Atta Dealers",
+    "phone": "0323-9798051",
+    "email": "zahidwazir0323@gmail.com",
+    "address": "Ker Maz Khel Galli, Wana Bazar",
+    "delivery": "We offer convenient local home delivery."
+  },
+  "products": [
+    {"id":"fine-atta","name":"Fine Atta","price":"Rs. 150 / Kg","image":"https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=700&q=80"},
+    {"id":"safed-chini","name":"Safed Chini","price":"Rs. 170 / Kg","image":"https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=700&q=80"},
+    {"id":"desi-ghee","name":"Desi Ghee","price":"Rs. 550 / Kg","image":"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=700&q=80"},
+    {"id":"basmati-chawal","name":"Basmati Chawal","price":"Rs. 280 / Kg","image":"https://images.unsplash.com/photo-1586208958839-06c17cacdf08?auto=format&fit=crop&w=700&q=80"},
+    {"id":"gehun-chokar","name":"Gehun Chokar","price":"Rs. 60 / Kg","image":"https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=700&q=80"},
+    {"id":"daal-chana","name":"Daal Chana","price":"Rs. 320 / Kg","image":"https://images.unsplash.com/photo-1585996748629-7d1f6a4b1219?auto=format&fit=crop&w=700&q=80"},
+    {"id":"daal-masoor","name":"Daal Masoor","price":"Rs. 300 / Kg","image":"https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=700&q=80"},
+    {"id":"cooking-oil","name":"Cooking Oil","price":"Rs. 500 / Ltr","image":"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=700&q=80"}
+  ]
+}

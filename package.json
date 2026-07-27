@@ -1,0 +1,8 @@
+{
+  "name": "rahmat-ullah-atta-dealers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure storefront and admin backend for Rahmat Ullah & Abdullah Atta Dealers",
+  "scripts": { "start": "node --env-file=.env server.js", "dev": "node --env-file=.env --watch server.js" },
+  "engines": { "node": ">=20" }
+}

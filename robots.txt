@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /api/
+
+Sitemap: https://rahmat-ullah-atta-dealers.vercel.app/sitemap.xml

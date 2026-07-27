@@ -1,0 +1,10 @@
+{
+  "name": "Rahmat Ullah & Abdullah Atta Dealers",
+  "short_name": "Rahmat Atta",
+  "description": "Quality atta, ghee, sugar and grocery items in Wana Bazar.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffaf0",
+  "theme_color": "#103b25",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
