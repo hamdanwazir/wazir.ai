@@ -77,4 +77,4 @@ const server = http.createServer(async (req,res) => {
   }
 });
 setInterval(() => { const now=Date.now(); for(const [id,s] of sessions)if(s.expires<now)sessions.delete(id); for(const [ip,a] of attempts)if(a.until<now)attempts.delete(ip); }, fifteenMinutes).unref();
-server.listen(port, () => console.log(`Website server listening on port ${port}`));
+module.exports = server;
