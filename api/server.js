@@ -3,7 +3,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const root = __dirname;
+const root = path.join(__dirname, "..");
 const dataFile = path.join(root, "data", "store.json");
 const production = process.env.NODE_ENV === "production";
 const adminPassword = process.env.ADMIN_PASSWORD;
