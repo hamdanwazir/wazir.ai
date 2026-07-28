@@ -10,7 +10,7 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.SESSION_SECRET;
 if (!adminPassword || !sessionSecret || sessionSecret.length < 32) {
   console.error("Set ADMIN_PASSWORD and a SESSION_SECRET of at least 32 characters before starting.");
-  process.exit(1);
+  throw new Error("Missing environment variables");
 }
 
 const sessions = new Map();
