@@ -1,13 +1,18 @@
 {
+  "version": 2,
   "functions": {
     "api/server.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "@vercel/node"
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/server.js"
+      "src": "/api/(.*)",
+      "dest": "/api/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/server.js"
     }
   ]
 }
