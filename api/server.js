@@ -12,6 +12,7 @@ const dataFile = path.join(__dirname, "..", "data", "store.json");
 const production = process.env.NODE_ENV === "production";
 const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.SESSION_SECRET;
+const geminiApiKey = process.env.GEMINI_API_KEY;
 if (!adminPassword || !sessionSecret || sessionSecret.length < 32) {
   console.error("Set ADMIN_PASSWORD and a SESSION_SECRET of at least 32 characters before starting.");
   throw new Error("Missing environment variables");
@@ -48,11 +49,57 @@ function loginAllowed(ip) { const state=attempts.get(ip); if (!state || state.un
 function failedLogin(ip) { const state=attempts.get(ip) || {count:0,until:Date.now()+fifteenMinutes}; state.count++; attempts.set(ip,state); }
 function safePath(urlPath) { const requested = urlPath === "/" ? "/index.html" : decodeURIComponent(urlPath); const resolved = path.resolve(root, `.${requested}`); return resolved.startsWith(root + path.sep) ? resolved : null; }
 
+const chatLimiter = new Map();
+function chatAllowed(ip) {
+  const now = Date.now();
+  const state = chatLimiter.get(ip);
+  if (!state || state.reset < now) { chatLimiter.set(ip, { count: 1, reset: now + 60000 }); return true; }
+  if (state.count >= 15) return false;
+  state.count++;
+  return true;
+}
+
+async function askGemini(message, productContext) {
+  if (!geminiApiKey) throw new Error("AI is not configured yet.");
+  const systemPrompt = `You are a friendly shop assistant for Rahmat Ullah & Abdullah Atta Dealers, a grocery shop in Wana Bazar, Pakistan. Answer questions about groceries, prices, delivery, and general shopping questions. Here is the current product list: ${productContext}. Keep answers short (2-4 sentences), warm, and helpful. If asked something unrelated to the shop, you may still answer briefly and helpfully like a general assistant.`;
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: "user", parts: [{ text: message }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
+      })
+    }
+  );
+  if (!response.ok) { const errText = await response.text(); throw new Error(`Gemini error: ${errText}`); }
+  const data = await response.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I could not think of an answer. Please WhatsApp us at 0323-9798051.";
+}
+
 module.exports = async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     if (url.pathname === "/api/products" && req.method === "GET") return send(res,200,(await readData()).products);
     if (url.pathname === "/api/store" && req.method === "GET") return send(res,200,(await readData()).store);
+    if (url.pathname === "/api/chat" && req.method === "POST") {
+      const ip = clientIp(req);
+      if (!chatAllowed(ip)) return send(res, 429, { error: "Too many questions. Please wait a minute and try again." });
+      const input = await body(req);
+      const message = cleanText(input.message, 500);
+      if (!message) return send(res, 400, { error: "Please type a question." });
+      try {
+        const productData = await readData();
+        const productContext = productData.products.map(p => `${p.name} (${p.price})`).join(", ");
+        const reply = await askGemini(message, productContext);
+        return send(res, 200, { reply });
+      } catch (err) {
+        console.error(err);
+        return send(res, 500, { error: "The smart assistant is unavailable right now. Please WhatsApp us at 0323-9798051." });
+      }
+    }
     if (url.pathname === "/api/admin/login" && req.method === "POST") {
       const ip=clientIp(req); if (!loginAllowed(ip)) return send(res,429,{error:"Too many attempts. Please wait 15 minutes."});
       const input=cleanText((await body(req)).password,300); const equal=input.length === adminPassword.length && crypto.timingSafeEqual(Buffer.from(input),Buffer.from(adminPassword));
