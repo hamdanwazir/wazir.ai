@@ -1,10 +1,14 @@
 "use strict";
+
+require("dotenv").config();
+
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const supabase = require("./supabase");
 
-const root = path.join(__dirname, "..");
-const dataFile = path.join(root, "data", "store.json");
+const root = path.join(__dirname, "..", "public");
+const dataFile = path.join(__dirname, "..", "data", "store.json");
 const production = process.env.NODE_ENV === "production";
 const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.SESSION_SECRET;
@@ -60,8 +64,8 @@ module.exports = async (req, res) => {
     if (url.pathname === "/api/admin/store" && req.method === "PUT") { if(!authorized(req,res))return; const input=await body(req), current=await readData(); const store={name:cleanText(input.name,100),phone:cleanText(input.phone,25),email:cleanText(input.email,100),address:cleanText(input.address,180),delivery:cleanText(input.delivery,250)}; if(Object.values(store).some(v=>!v))return send(res,400,{error:"All store fields are required."}); current.store=store; await writeData(current); return send(res,200,{store}); }
     if (url.pathname === "/api/admin/products" && req.method === "POST") { if(!authorized(req,res))return; const product=validProduct(await body(req)); if(!product)return send(res,400,{error:"Enter a name, price and valid HTTPS image URL."}); const current=await readData(); if(current.products.some(p=>p.id===product.id))product.id=`${product.id}-${Date.now()}`; current.products.push(product); await writeData(current); return send(res,201,{product}); }
     const match=url.pathname.match(/^\/api\/admin\/products\/([a-z0-9-]+)$/i);
-    if (match && req.method === "PUT") { if(!authorized(req,res))return; const product=validProduct({...await body(req),id:match[1]}); if(!product)return send(res,400,{error:"Enter a name, price and valid HTTPS image URL."}); const current=await readData(), index=current.products.findIndex(p=>p.id===match[1]); if(index<0)return send(res,404,{error:"Product not found."}); current.products[index]=product; await writeData(current); return send(res,200,{product}); }
-    if (match && req.method === "DELETE") { if(!authorized(req,res))return; const current=await readData(), before=current.products.length; current.products=current.products.filter(p=>p.id!==match[1]); if(before===current.products.length)return send(res,404,{error:"Product not found."}); await writeData(current); return send(res,200,{ok:true}); }
+    if (match && req.method === "PUT") { if(!authorized(req,res))return; const product=validProduct({...await body(req),id:match[1]}); if(!product)return send(res,400,{error:"Enter a name, price and valid HTTPS image URL."}); const current=await readData(), index=current.products.findIndex(p=>p.id===match[1]); if(index<0)return await writeData(current);send(res,404,{error:"Product not found."}); current.products[index]=product; await writeData(current); return send(res,200,{product}); }
+    if (match && req.method === "DELETE") { if(!authorized(req,res))return; const current=await readData(), before=current.products.length; current.products=current.products.filter(p=>p.id!==match[1]); if(before===current.products.length)return send(res,404,{error:"Product not found."});  return send(res,200,{ok:true}); }
     if (req.method !== "GET" && req.method !== "HEAD") return send(res,405,{error:"Method not allowed."});
     const file=safePath(url.pathname); if(!file) return send(res,403,{error:"Forbidden"}); const ext=path.extname(file).toLowerCase(); const content=await fs.readFile(file); securityHeaders(res); res.writeHead(200,{"Content-Type":mime[ext]||"application/octet-stream", "Cache-Control":ext===".html"?"no-cache":"public, max-age=3600"}); res.end(req.method === "HEAD" ? undefined : content);
   } catch (error) {
