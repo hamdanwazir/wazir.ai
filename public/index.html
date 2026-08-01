@@ -110,19 +110,27 @@
     const chatInput = document.getElementById('chat-input');
     const chatMessages = document.getElementById('chat-messages');
     const addMessage = (text, kind) => { const message = document.createElement('div'); message.className = `message ${kind}`; message.textContent = text; chatMessages.appendChild(message); chatMessages.scrollTop = chatMessages.scrollHeight; };
-    const answer = question => {
-      const q = question.toLowerCase();
-      if (q.includes('price') || q.includes('rate') || q.includes('cost')) return 'Our listed prices include Fine Atta Rs. 150/kg, Safed Chini Rs. 170/kg, Desi Ghee Rs. 550/kg, Basmati Chawal Rs. 280/kg, Daal Chana Rs. 320/kg, and Daal Masoor Rs. 300/kg.';
-      if (q.includes('atta') || q.includes('flour')) return 'Fine Atta is Rs. 150 per kg. You can use the WhatsApp Order button on the Fine Atta card to order.';
-      if (q.includes('ghee') || q.includes('oil')) return "Desi Ghee is Rs. 550 per kg and Cooking Oil is Rs. 500 per litre. Please WhatsApp us to check today's availability.";
-      if (q.includes('dal') || q.includes('daal') || q.includes('chana') || q.includes('masoor')) return 'Daal Chana is Rs. 320 per kg and Daal Masoor is Rs. 300 per kg.';
-      if (q.includes('deliver') || q.includes('home')) return 'We offer convenient local home delivery. Send your address and shopping list on WhatsApp, and our team will guide you.';
-      if (q.includes('order') || q.includes('whatsapp')) return 'To order, tap any WhatsApp Order button or message us directly at 0323-9798051 with your required items and quantity.';
-      if (q.includes('contact') || q.includes('phone') || q.includes('number') || q.includes('address')) return 'Call or WhatsApp 0323-9798051. Our shop is at Ker Maz Khel Galli, Wana Bazar.';
-      if (q.includes('hello') || q.includes('salam') || q.includes('hi')) return 'Wa Alaikum Assalam! How can I help with your grocery order today?';
-      return 'I can help with product prices, ordering, delivery, and contact details. For a specific request, please WhatsApp us at 0323-9798051.';
+    const askAI = async question => {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: question })
+        });
+        const data = await response.json();
+        if (!response.ok) return data.error || 'Sorry, something went wrong. Please WhatsApp us at 0323-9798051.';
+        return data.reply;
+      } catch (err) {
+        return 'Sorry, I could not connect right now. Please WhatsApp us at 0323-9798051.';
+      }
     };
-    const ask = text => { const clean = text.trim(); if (!clean) return; addMessage(clean, 'user'); chatInput.value = ''; window.setTimeout(() => addMessage(answer(clean), 'bot'), 350); };
+    const ask = async text => {
+      const clean = text.trim(); if (!clean) return;
+      addMessage(clean, 'user'); chatInput.value = '';
+      const thinking = document.createElement('div'); thinking.className = 'message bot'; thinking.textContent = '...'; chatMessages.appendChild(thinking); chatMessages.scrollTop = chatMessages.scrollHeight;
+      const reply = await askAI(clean);
+      thinking.textContent = reply;
+    };
     chatToggle.addEventListener('click', () => { chatbox.classList.add('open'); chatInput.focus(); });
     chatClose.addEventListener('click', () => chatbox.classList.remove('open'));
     chatForm.addEventListener('submit', event => { event.preventDefault(); ask(chatInput.value); });
