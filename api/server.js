@@ -63,7 +63,7 @@ async function askGemini(message, productContext) {
   if (!geminiApiKey) throw new Error("AI is not configured yet.");
   const systemPrompt = `You are a friendly shop assistant for Rahmat Ullah & Abdullah Atta Dealers, a grocery shop in Wana Bazar, Pakistan. Answer questions about groceries, prices, delivery, and general shopping questions. Here is the current product list: ${productContext}. Keep answers short (2-4 sentences), warm, and helpful. If asked something unrelated to the shop, you may still answer briefly and helpfully like a general assistant.`;
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
